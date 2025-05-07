@@ -1,0 +1,20 @@
+retro_game/
+│
+├── main.py                   # Główna pętla gry i kontrola stanu
+├── settings.py               # Konfiguracja (np. rozdzielczość, kolory, FPS)
+├── assets/                   # Grafika, muzyka, fonty itp.
+│   ├── 4bit/
+│   ├── 8bit/
+│   └── 16bit/
+│
+├── hub/
+│   └── hub_world.py          # Kod lokacji startowej z portalami
+│
+├── levels/
+│   ├── level_4bit.py         # Pierwsza gra/świat (4-bitowa)
+│   ├── level_8bit.py         # Druga gra/świat (8-bitowa)
+│   └── level_16bit.py        # Trzecia gra/świat (16-bitowa)
+│
+├── engine/
+│   ├── scene_manager.py      # Zarządzanie scenami (np. przełączanie światów)
+│   └── utils.py              # Funkcje pomocnicze
