@@ -55,7 +55,7 @@ class Level4Bit:
         for _ in range(5):
             rect = pygame.Rect(random.randint(0, WIDTH - 20), random.randint(0, HEIGHT - 20), 15, 15)
             self.veggies.append(rect)
-            self.veggie_types.append(random.randint(0, len(fruit_imgs)-1))
+            self.veggie_types.append(random.randint(0, len(self.fruit_imgs) - 1))
 
         self.food_items = [pygame.Rect(random.randint(0, WIDTH - 20), random.randint(0, HEIGHT - 20), 20, 20)
                            for _ in range(4)]
