@@ -1,4 +1,4 @@
-retro_game/
+TimeGlitchGame/
 │
 ├── main.py                   # Główna pętla gry i kontrola stanu
 ├── settings.py               # Konfiguracja (np. rozdzielczość, kolory, FPS)
