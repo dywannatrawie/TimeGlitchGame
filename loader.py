@@ -1,7 +1,6 @@
-# loader.py
-
 import pygame
 import os
+from settings import WIDTH, HEIGHT
 
 def load_fruit_images():
     fruit_paths = ["apple.png", "banana.png", "pear.png"]
@@ -25,9 +24,33 @@ def load_mouse_images():
 def load_obstacle_image():
     return pygame.transform.scale(pygame.image.load(os.path.join("assets", "graphic", "block.png")), (40, 40))
 
-def load_background():
-    bg = pygame.image.load(os.path.join("assets", "graphic", "background.png"))
-    return pygame.transform.scale(bg, (800, 600))
+def load_background(scene="hub"):
+    try:
+        if scene == "hub":
+            path = os.path.join("assets", "graphic", "hubbackground.png")
+        else:
+            path = os.path.join("assets", scene, "background.png")
+        bg = pygame.image.load(path)
+        return pygame.transform.scale(bg, (WIDTH, HEIGHT))
+    except Exception as e:
+        print(f"Nie udało się załadować tła dla '{scene}': {e}")
+        return pygame.Surface((WIDTH, HEIGHT))  # domyślne czarne tło
 
-def load_font():
-    return pygame.font.SysFont(None, 36)
+def load_portal_image():
+    try:
+        img = pygame.image.load(os.path.join("assets", "hub", "portal.png")).convert_alpha()
+        return pygame.transform.scale(img, (40, 80))
+    except:
+        return None
+
+def load_font(scene="hub"):
+    try:
+        if scene == "8bit":
+            return pygame.font.Font(os.path.join("assets", "8bit", "8bit_font.ttf"), 28)
+        elif scene == "16bit":
+            return pygame.font.Font(os.path.join("assets", "16bit", "16bit_font.ttf"), 32)
+        else:
+            return pygame.font.SysFont(None, 36)
+    except Exception as e:
+        print(f"Błąd ładowania fontu dla '{scene}': {e}")
+        return pygame.font.SysFont(None, 36)

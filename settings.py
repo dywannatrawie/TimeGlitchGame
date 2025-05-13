@@ -4,6 +4,13 @@ import pygame
 WIDTH, HEIGHT = 800, 600
 FPS = 60
 
+# 1bit level
+PADDLE_WIDTH = 10
+PADDLE_HEIGHT = 80
+
+PLAYER_SPEED = 6
+ENEMY_SPEED = 2 # oryginalne 5, może być 3
+
 # Colors
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)

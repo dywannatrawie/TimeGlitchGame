@@ -1,45 +1,98 @@
 import pygame
-from settings import WIDTH, HEIGHT, YELLOW, WHITE, CYAN, BLACK
-from loader import load_background, load_font
+import math
+import os
+from settings import WIDTH, HEIGHT, YELLOW, WHITE, CYAN, BLACK, GREEN, RED
+from loader import load_background, load_font, load_portal_image
+import pygame.mixer
 
 class HubWorld:
     def __init__(self, manager):
         self.background = load_background()
         self.font = load_font()
         self.manager = manager
-        self.ludzik = pygame.Rect(100, 300, 20, 20)
-        self.portal = pygame.Rect(WIDTH - 40, HEIGHT // 2 - 40, 30, 80)
-        self.portal2 = pygame.Rect(300, 200, 50, 80)
-        self.portal2_color = (255, 100, 0)
+
+        self.ludzik = pygame.Rect(WIDTH // 2 - 15, HEIGHT // 2 - 15, 30, 30)
+        self.portal_glow = 0
+        self.glow_up = True
+
+        # Wczytanie grafiki portalu
+        self.portal_img = load_portal_image()
+
+
+        # Dźwięk portalu
+        try:
+            self.portal_sound = pygame.mixer.Sound("assets/sound/portal.wav")
+        except:
+            self.portal_sound = None
+
+        spacing = 100
+        top_y = HEIGHT // 2 - 150
+        left_x = WIDTH // 4 - 20
+        right_x = WIDTH * 3 // 4 - 20
+
+        self.portals = {
+            "1bit": pygame.Rect(left_x, top_y + spacing * 0, 40, 80),
+            "8bit": pygame.Rect(left_x, top_y + spacing * 1, 40, 80),
+            "8bit_2": pygame.Rect(right_x, top_y + spacing * 0, 40, 80),
+            "8bit_3": pygame.Rect(right_x, top_y + spacing * 1, 40, 80),
+            "64bit": pygame.Rect(WIDTH // 2 - 20, top_y + spacing * 2, 40, 80),
+            "tetris": pygame.Rect(WIDTH // 2 - 20, HEIGHT - 120, 40, 80)
+        }
+
+        self.portal_colors = {
+            "1bit": CYAN,
+            "8bit": GREEN,
+            "8bit_2": GREEN,
+            "8bit_3": GREEN,
+            "64bit": RED,
+            "tetris": WHITE
+        }
 
     def update(self, keys, events):
-        for event in events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    exit()
+        speed = 5
+        if keys[pygame.K_LEFT]:
+            self.ludzik.x -= speed
+        if keys[pygame.K_RIGHT]:
+            self.ludzik.x += speed
+        if keys[pygame.K_UP]:
+            self.ludzik.y -= speed
+        if keys[pygame.K_DOWN]:
+            self.ludzik.y += speed
 
-        ludzik_speed = 5
-        for dx, dy, key in [(-ludzik_speed, 0, keys[pygame.K_LEFT]), (ludzik_speed, 0, keys[pygame.K_RIGHT]),
-                            (0, -ludzik_speed, keys[pygame.K_UP]), (0, ludzik_speed, keys[pygame.K_DOWN])]:
-            if key:
-                next_pos = self.ludzik.move(dx, dy)
-                self.ludzik = next_pos
+        for name, rect in self.portals.items():
+            if self.ludzik.colliderect(rect):
+                if self.portal_sound:
+                    self.portal_sound.play()
+                scene = name if not name.startswith("8bit_") else "8bit"
+                self.manager.load_scene(scene)
 
-        if self.ludzik.colliderect(self.portal):
-            self.manager.load_scene("4bit")
-
-        if self.manager.unlocked_scenes["8bit"] and self.ludzik.colliderect(self.portal2):
-            # np. launch external Tetris or transition
-            self.manager.launch_tetris()
+        # Animacja świecenia portali
+        if self.glow_up:
+            self.portal_glow += 2
+            if self.portal_glow >= 60:
+                self.glow_up = False
+        else:
+            self.portal_glow -= 2
+            if self.portal_glow <= 0:
+                self.glow_up = True
 
     def draw(self, screen):
         screen.blit(self.background, (0, 0))
-        pygame.draw.rect(screen, YELLOW, self.ludzik)
-        pygame.draw.rect(screen, WHITE, self.portal)
 
-        if self.manager.unlocked_scenes["8bit"]:
-            pygame.draw.rect(screen, self.portal2_color, self.portal2)
-            screen.blit(self.font.render("Mini-gra odblokowana!", True, BLACK), (WIDTH // 2 - 120, HEIGHT // 2))
-        else:
-            screen.blit(self.font.render("Wejście do Areny", True, BLACK), (self.portal.x - 30, self.portal.y - 30))
+        for name, rect in self.portals.items():
+            color = self.portal_colors[name]
+            animated_color = (
+                min(color[0] + self.portal_glow, 255),
+                min(color[1] + self.portal_glow, 255),
+                min(color[2] + self.portal_glow, 255)
+            )
+
+            pygame.draw.rect(screen, animated_color, rect.inflate(10, 10), 3)
+            if self.portal_img:
+                screen.blit(self.portal_img, rect.topleft)
+            else:
+                pygame.draw.rect(screen, animated_color, rect)
+
+            screen.blit(self.font.render(name.upper(), True, BLACK), (rect.x, rect.y - 30))
+
+        pygame.draw.rect(screen, WHITE, self.ludzik)
